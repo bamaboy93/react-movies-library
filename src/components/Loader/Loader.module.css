@@ -1,0 +1,9 @@
+.loaderContainer {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -50px;
+  margin-top: -50px;
+}
