@@ -1,61 +1,76 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import styles from '../HomePage/HomeView.module.css';
-import Status from '../../services/status';
-import api from '../../services/moviesApi';
+import { useHistory, useLocation } from 'react-router-dom';
+
+import { getPopularMovies } from '../../services/moviesApi';
+
+import MoviesList from '../../components/MoviesList';
+
+import Pagination from '@mui/material/Pagination';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
 
 function HomePage() {
   const [movies, setMovies] = useState(null);
   const [error, setError] = useState(null);
-  const [status, setStatus] = useState(Status.IDLE);
+  const [pages, setPages] = useState(1);
+  const history = useHistory();
+  const location = useLocation();
+
+  const page = new URLSearchParams(location.search).get('page') ?? 1;
 
   useEffect(() => {
-    setStatus(Status.PENDING);
-    api
-      .getPopularMovies()
-      .then(results => {
+    const fetchMovies = async () => {
+      try {
+        const { results, total_pages } = await getPopularMovies(page);
         setMovies(results);
-        setStatus(Status.RESOLVED);
-      })
-      .catch(error => {
-        console.log(error);
+        setPages(total_pages);
+      } catch (error) {
         setError(error);
-        setStatus(Status.REJECTED);
-      });
-  }, [error]);
+      }
+    };
+    fetchMovies();
+  }, [error, page]);
 
+  const loadMore = (event, page) => {
+    history.push({ ...location, search: `page=${page}` });
+  };
   return (
     <main>
-      <h1 className={styles.title}>Trending Movies Today</h1>
+      <Typography
+        component="h1"
+        variant="h3"
+        sx={{
+          fontWeight: 'bold',
+          textTransform: 'uppercase',
+          fontSize: '2.5rem',
+          mt: 4,
+          mb: 6,
+          textAlign: 'center',
+          color: '#1976d2',
+        }}
+      >
+        Trending Movies Today
+      </Typography>
 
-      {status === Status.PENDING}
-
-      {status === Status.REJECTED}
-
-      {status === Status.RESOLVED && (
+      {movies?.length > 0 && (
         <>
-          <ul className={styles.moviesList}>
-            {movies.map(({ id, poster_path, title }) => (
-              <li key={id} className={styles.moviesItem}>
-                <Link
-                  to={{
-                    pathname: `movies/${id}`,
-                  }}
-                >
-                  <img
-                    src={
-                      (poster_path = `https://image.tmdb.org/t/p/w500/${poster_path}`)
-                    }
-                    alt={title}
-                    className={styles.poster}
-                  />
-                </Link>
-                <div className={styles.movieCard}>
-                  <p className={styles.movieTitle}>{title}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <MoviesList movies={movies} url={'movies'} location={'/'} />
+
+          {pages > 1 && (
+            <>
+              <Box sx={{ display: 'flex', justifyContent: 'center' }} mb={4}>
+                <Pagination
+                  count={pages}
+                  variant="outlined"
+                  color="primary"
+                  onChange={loadMore}
+                  page={Number(page)}
+                  showFirstButton
+                  showLastButton
+                />
+              </Box>
+            </>
+          )}
         </>
       )}
     </main>

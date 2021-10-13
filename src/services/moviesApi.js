@@ -8,86 +8,108 @@ axios.defaults.params = {
   api_key: API_KEY,
   language: 'en-US',
 };
+const getPopularMovies = async (page = 1) => {
+  const { data } = await axios.get(`/trending/all/day?page=${page}`);
+  return data;
+};
+// async function getPopularMovies() {
+//   try {
+//     const config = {
+//       url: `trending/movie/day`,
+//     };
+//     const { data } = await axios(config);
 
-async function getPopularMovies() {
+//     return data.results;
+//   } catch (error) {
+//     console.log('error', { error });
+//     return null;
+//   }
+// }
+const getMoviesByQuery = async (query, page = 1) => {
+  const { data } = await axios.get(
+    `/search/movie?language=en-US&page=${page}&include_adult=false&query=${query}`,
+  );
+  return data;
+};
+// async function getMoviesByQuery(query) {
+//   try {
+//     const config = {
+//       url: `search/movie`,
+//       params: {
+//         query,
+//       },
+//     };
+//     const { data } = await axios(config, query);
+
+//     return data.results;
+//   } catch (error) {
+//     console.log('error', { error });
+//     return null;
+//   }
+// }
+const getMovieById = async movieID => {
   try {
-    const config = {
-      url: `trending/movie/day`,
-    };
-    const { data } = await axios(config);
-
-    return data.results;
+    const response = await axios.get(`/movie/${movieID}`);
+    if (response.status === 200) {
+      console.log('result', response.status);
+      return response.data;
+    }
   } catch (error) {
-    console.log('error', { error });
-    return null;
+    throw error;
   }
-}
+};
+// async function getMovieById(id) {
+//   try {
+//     const config = {
+//       url: `movie/${id}`,
+//     };
+//     const { data } = await axios(config, id);
 
-async function getMoviesByQuery(query) {
-  try {
-    const config = {
-      url: `search/movie`,
-      params: {
-        query,
-      },
-    };
-    const { data } = await axios(config, query);
+//     return data;
+//   } catch (error) {
+//     console.log('error', { error });
+//     return null;
+//   }
+// }
+const getCastInfo = async movieId => {
+  const { data } = await axios.get(`/movie/${movieId}/credits`);
+  return data;
+};
+// async function getCastInfo(id) {
+//   try {
+//     const config = {
+//       url: `movie/${id}/credits`,
+//     };
+//     const { data } = await axios(config, id);
 
-    return data.results;
-  } catch (error) {
-    console.log('error', { error });
-    return null;
-  }
-}
+//     return data.cast;
+//   } catch (error) {
+//     console.log('error', { error });
+//     return null;
+//   }
+// }
+const getMovieVideo = async movieId => {
+  const { data } = await axios.get(`/movie/${movieId}/videos`);
+  return data;
+};
+// async function getMovieVideo(id) {
+//   try {
+//     const config = {
+//       url: `movie/${id}/videos`,
+//     };
+//     const { data } = await axios(config, id);
 
-async function getMovieById(id) {
-  try {
-    const config = {
-      url: `movie/${id}`,
-    };
-    const { data } = await axios(config, id);
+//     return data.results;
+//   } catch (error) {
+//     console.log('error', { error });
+//     return null;
+//   }
+// }
 
-    return data;
-  } catch (error) {
-    console.log('error', { error });
-    return null;
-  }
-}
-
-async function getCastInfo(id) {
-  try {
-    const config = {
-      url: `movie/${id}/credits`,
-    };
-    const { data } = await axios(config, id);
-
-    return data.cast;
-  } catch (error) {
-    console.log('error', { error });
-    return null;
-  }
-}
-
-async function getMovieReviews(id) {
-  try {
-    const config = {
-      url: `movie/${id}/reviews`,
-    };
-    const { data } = await axios(config, id);
-
-    return data.results;
-  } catch (error) {
-    console.log('error', { error });
-    return null;
-  }
-}
-
-const api = {
+export {
   getPopularMovies,
   getMoviesByQuery,
   getMovieById,
   getCastInfo,
-  getMovieReviews,
+  getMovieVideo,
 };
-
-export default api;
